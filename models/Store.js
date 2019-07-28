@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 const slug = require('slugs');
 
+// Strict Schema| will only pick up items that are defined here and nothing extra that gets possibly sent.
 const storeSchema = new mongoose.Schema({
   name: {
     type: String,
