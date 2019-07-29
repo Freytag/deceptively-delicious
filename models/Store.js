@@ -33,6 +33,9 @@ const storeSchema = new mongoose.Schema({
       type: String,
       required: 'An Address is Required for a Location'
     }
+  },
+  photo: {
+    type: String
   }
 });
 
