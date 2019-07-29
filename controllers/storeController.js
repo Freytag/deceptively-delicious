@@ -17,11 +17,13 @@ exports.createStore = async (req, res) => {
   // store.save() returns a promise so we can await it.
   // await store.save();
   // use composition; use a higher function that wraps createStore to catch errors
-  req.flash('success', `You have succesxsfully created ${store.name}. Do you want to leave a review?`);
+  req.flash('success', `You have successfully created ${store.name}. Do you want to leave a review?`);
   res.redirect(`/store/${store.slug}`);
 }
 
 exports.updateStore = async (req, res) => {
+  // set the location data to be a point
+  req.body.location.type = 'Point';
   // 1. find and update the store
   // findOneAndUpdate(query object, data, options{});
   const store = await Store.findOneAndUpdate({ _id: req.params.id}, req.body, {

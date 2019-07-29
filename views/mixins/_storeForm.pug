@@ -1,12 +1,28 @@
 mixin storeForm(store = {})
-  - // action= where to send the data
-  - // method= how to send the data; POST= Send data invisibly, SAFER; GET= post the data in the URL
-  -// TODO add enctype="multipart/form-data" when adding images
+  //- action= where to send the data
+  //- method= how to send the data; POST= Send data invisibly, SAFER; GET= post the data in the URL
+  //- TODO add enctype="multipart/form-data" when adding images
   form(action=`/add/${store._id || ''}` method="POST" class="card")
+    label(for="search" ) Google Location Search
+    input(type="text" id="search" name="location[search]" value=(store.location && store.location.search) required)
+    //- value=(checks for first value if it exist uses second other wise false returns '')
+
     label(for="name" ) Name
-    input(type="text" name="name" value=store.name)
+    input(type="text" id="name" name="name" value=store.name  required)
+
+    label(for="address" ) Address
+    //- value=(checks for first value if it exist uses second other wise false returns '')
+    input(type="text" id="address" name="location[address]" value=(store.location && store.location.address) required)
+
+    //- label(for="lng" ) Address Long
+    input(type="hidden" id="lng" name="location[coordinates][0]" value=(store.location && store.location.coordinates[0]) required)
+
+    //- label(for="lat" ) Address Lat
+    input(type="hidden" id="lat" name="location[coordinates][1]" value=(store.location && store.location.coordinates[1])  required)
+
     label(for="description") Description
-    textarea(name="description")= store.description
+    textarea(name="description" id="description")= store.description
+
     - const choices = ['WiFi','Open late', 'Family Friendly', 'Vegetarian', 'Licensed']
     - const tags = store.tags || []
     ul.tags
