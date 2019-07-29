@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Store = mongoose.model('Store')
 const multer = require('multer');
 const jimp = require('jimp');
-const uuid = require('uuid');
+const uuidv4 = require('uuid/v4');
 
 const multerOptions = {
   storage: multer.memoryStorage(),
@@ -35,7 +35,7 @@ exports.resize = async (req, res, next) => {
     return;
   }
   const ext = req.file.mimetype.split('/')[1];
-  req.body.photo = `${uuid.v4()}.${ext}`
+  req.body.photo = `${uuidv4()}.${ext}`
   // now resize
   const photo = await jimp.read(req.file.buffer);
   await photo.resize(800, jimp.AUTO);
