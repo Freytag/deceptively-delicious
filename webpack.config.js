@@ -3,9 +3,11 @@
 */
 
 const path = require('path');
-const webpack = require('webpack');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const autoprefixer = require('autoprefixer');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const devMode = process.env.NODE_ENV !== 'production';
+// const webpack = require('webpack');
+// const autoprefixer = require('autoprefixer');
+
 /*
   webpack sees every file as a module.
   How to handle those files is up to loaders.
@@ -14,37 +16,25 @@ const autoprefixer = require('autoprefixer');
 
 // This is our JavaScript rule that specifies what to do with .js files
 const javascript = {
-  test: /\.(js)$/, // see how we match anything that ends in `.js`? Cool
-  use: [{
+  test: /\.m?js$/,
+  exclude: /(node_modules|bower_components)/,
+  use: {
     loader: 'babel-loader',
-    options: { presets: ['env'] } // this is one way of passing options
-  }],
-};
-
-/*
-  This is our postCSS loader which gets fed into the next loader. I'm setting it up in it's own variable because its a didgeridog
-*/
-
-const postcss = {
-  loader: 'postcss-loader',
-  options: {
-    plugins() { return [autoprefixer({ browsers: 'last 3 versions' })]; }
+    options: {
+      presets: ['@babel/preset-env']
+    }
   }
-};
+}
 
-// this is our sass/css loader. It handles files that are require('something.scss')
 const styles = {
-  test: /\.(scss)$/,
-  // here we pass the options as query params b/c it's short.
-  // remember above we used an object for each loader instead of just a string?
-  // We don't just pass an array of loaders, we run them through the extract plugin so they can be outputted to their own .css file
-  use: ExtractTextPlugin.extract(['css-loader?sourceMap', postcss, 'sass-loader?sourceMap'])
+    test: /\.scss$/,
+    use: [
+        // fallback to style-loader in development
+        process.env.NODE_ENV !== 'production' ? 'style-loader' : MiniCssExtractPlugin.loader,
+        "css-loader",
+        "sass-loader"
+    ]
 };
-
-// We can also use plugins - this one will compress the crap out of our JS
-const uglify = new webpack.optimize.UglifyJsPlugin({ // eslint-disable-line
-  compress: { warnings: false }
-});
 
 // OK - now it's time to put it all together
 const config = {
@@ -64,15 +54,19 @@ const config = {
     filename: '[name].bundle.js'
   },
 
-  // remember we said webpack sees everthing as modules and how different loaders are responsible for different file types? Here is is where we implement them. Pass it the rules for our JS and our styles
+  // remember we said webpack sees everything as modules and how different loaders are responsible for different file types? Here is is where we implement them. Pass it the rules for our JS and our styles
   module: {
     rules: [javascript, styles]
   },
   // finally we pass it an array of our plugins - uncomment if you want to uglify
   // plugins: [uglify]
   plugins: [
-    // here is where we tell it to output our css to a separate file
-    new ExtractTextPlugin('style.css'),
+    new MiniCssExtractPlugin({
+      // Options similar to the same options in webpackOptions.output
+      // both options are optional
+      filename: devMode ? '[name].css' : '[name].[hash].css',
+      chunkFilename: devMode ? '[id].css' : '[id].[hash].css',
+    }),
   ]
 };
 // webpack is cranky about some packages using a soon to be deprecated API. shhhhhhh
