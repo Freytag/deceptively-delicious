@@ -52,4 +52,16 @@ storeSchema.pre('save', async function(next) {
   // TODO make more resilient so slugs are always unique
 })
 
+storeSchema.statics.getTagsList = function() {
+  return this.aggregate([
+    { $unwind: '$tags' },
+      // $ says this is a field on my document i want to unwind
+    { $group: { _id: '$tags', count: { $sum: 1 } } },
+      //group everything based on their tag field. //new property count using sum operator.
+    { $sort: { count: -1 } }
+     // -1 descending, 1 ascending
+  ]);
+}
+
+
 module.exports = mongoose.model('Store', storeSchema);
