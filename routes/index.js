@@ -58,4 +58,20 @@ router.get('/account',
 
 router.post('/account', catchErrors(userController.updateAccount));
 
+// 1. check if the email is registered.
+// 2. set token for the user
+// 3. set expiration for token
+// 4. save user
+// 5. email token for password reset
+router.post('/account/forgot', catchErrors(authController.forgot))
+
+router.get('/account/reset/:token', catchErrors(authController.reset))
+
+router.post('/account/reset/:token',
+  catchErrors(authController.confirmPassword),
+  catchErrors(authController.update)
+);
+
+
+
 module.exports = router;
