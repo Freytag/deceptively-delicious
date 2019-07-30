@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  .inner
+    form.form(action="/account" method="POST")
+      h2 Edit your account
+      label(for="name") Name
+      input(type="text" name="name" id="name" value=user.name)
+      label(for="email") Email
+      input(type="email" name="email" id="email" value=user.email)
+      //- label(for="password") Password
+      //- input(type="password" name="password" id="password")
+      //- label(for="password-confirm") Confirm Password
+      //- input(type="password" name="password-confirm" id="password-confirm")
+      input.button(type="submit" value="Update My Account")

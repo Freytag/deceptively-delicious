@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-mongoose.Promise = global.Promise;
+// mongoose.Promise = global.Promise; should be fixed by now
 const slug = require('slugs');
 const uuidv4 = require('uuid/v4');
 
