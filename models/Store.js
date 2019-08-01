@@ -45,17 +45,21 @@ const storeSchema = new mongoose.Schema({
   }
 });
 
+storeSchema.index({
+  name: 'text',
+  description: 'text'
+})
+
 storeSchema.pre('save', async function(next) {
   if (!this.isModified('name')){
     next(); // skip it
     return; // stop this function from running
   }
   this.slug = slug(`${this.name} ${uuidv4()}`);
-  // finds if other stores already have same name, and increment if so
-
   next();
-  // TODO make more resilient so slugs are always unique
 })
+
+// TODO add pre-save function to remove HTML from specific inputs before saving to DB.
 
 storeSchema.statics.getTagsList = function() {
   return this.aggregate([
@@ -67,6 +71,5 @@ storeSchema.statics.getTagsList = function() {
      // -1 descending, 1 ascending
   ]);
 }
-
 
 module.exports = mongoose.model('Store', storeSchema);
