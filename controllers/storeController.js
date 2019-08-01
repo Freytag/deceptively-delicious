@@ -45,6 +45,7 @@ exports.resize = async (req, res, next) => {
 }
 
 exports.createStore = async (req, res) => {
+  req.body.author = req.user._id;
   // const store = new Store(req.body);
   // Wrapped, added .save() so the response will have slug added to the store variable
   const store = await (new Store(req.body)).save();
@@ -83,15 +84,24 @@ exports.getStoreBySlug = async (req, res) => {
   const storeSlug = req.params.slug;
   // 2. render the edit form to allow the user to update
   const store = await Store.findOne({ slug: storeSlug});
+  // const store = await Store.findOne({ slug: storeSlug}).populate('author');
   res.render('store', { title: `${store.name}`, store });
+}
+
+exports.confirmOwner = (store, user) => {
+  // we are not using middle ware as we need to find the store before we can check
+  if (!store.author.equals(user._id)) {
+    throw Error('You must own a store in order to edit it.');
+  }
 }
 
 exports.editStore = async(req, res) => {
   // 1. find store given the ID
   const storeId = req.params.id;
-  // 2. confirm thy ar the owner of the store
-  // 3. render the edit form to allow the user to update
   const store = await Store.findOne({ _id: storeId});
+  // 2. confirm thy ar the owner of the store
+  this.confirmOwner(store, req.user);
+  // 3. render the edit form to allow the user to update
   res.render('editStore', { title: `Edit ${store.name}`, store });
 }
 
