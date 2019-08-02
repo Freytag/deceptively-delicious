@@ -3592,12 +3592,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _modules_bling__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./modules/bling */ "./public/javascripts/modules/bling.js");
 /* harmony import */ var _modules_autocomplete__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./modules/autocomplete */ "./public/javascripts/modules/autocomplete.js");
 /* harmony import */ var _modules_typeahead__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./modules/typeahead */ "./public/javascripts/modules/typeahead.js");
+/* harmony import */ var _modules_map__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./modules/map */ "./public/javascripts/modules/map.js");
+
 
 
 
 
 Object(_modules_autocomplete__WEBPACK_IMPORTED_MODULE_2__["default"])(Object(_modules_bling__WEBPACK_IMPORTED_MODULE_1__["$"])('#search'), Object(_modules_bling__WEBPACK_IMPORTED_MODULE_1__["$"])('#name'), Object(_modules_bling__WEBPACK_IMPORTED_MODULE_1__["$"])('#address'), Object(_modules_bling__WEBPACK_IMPORTED_MODULE_1__["$"])('#lat'), Object(_modules_bling__WEBPACK_IMPORTED_MODULE_1__["$"])('#lng'));
 Object(_modules_typeahead__WEBPACK_IMPORTED_MODULE_3__["default"])(Object(_modules_bling__WEBPACK_IMPORTED_MODULE_1__["$"])('.search'));
+Object(_modules_map__WEBPACK_IMPORTED_MODULE_4__["default"])(Object(_modules_bling__WEBPACK_IMPORTED_MODULE_1__["$"])('#map'));
 
 /***/ }),
 
@@ -3660,6 +3663,109 @@ NodeList.prototype.on = NodeList.prototype.addEventListener = function (name, fn
 };
 
 
+
+/***/ }),
+
+/***/ "./public/javascripts/modules/map.js":
+/*!*******************************************!*\
+  !*** ./public/javascripts/modules/map.js ***!
+  \*******************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _bling__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./bling */ "./public/javascripts/modules/bling.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_1__);
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+
+
+navigator.geolocation.getCurrentPosition(geoSuccess, geoError);
+var googleMap;
+var mapOptions = {
+  center: {
+    lat: 43.2608503,
+    lng: -79.8711111
+  },
+  zoom: 6
+};
+
+function initMap(mapDiv) {
+  if (!mapDiv) return;
+  googleMap = new google.maps.Map(mapDiv, mapOptions);
+  var searchInput = Object(_bling__WEBPACK_IMPORTED_MODULE_0__["$"])('[name=geolocate]');
+  var autocomplete = new google.maps.places.Autocomplete(searchInput);
+  autocomplete.addListener('place_changed', function () {
+    var place = autocomplete.getPlace();
+    console.log(place);
+    loadNearByStores({
+      lat: place.geometry.location.lat(),
+      lng: place.geometry.location.lng()
+    });
+  });
+}
+
+function loadNearByStores(loc) {
+  axios__WEBPACK_IMPORTED_MODULE_1___default.a.get("/api/stores/near?lat=".concat(loc.lat, "&lng=").concat(loc.lng)).then(function (res) {
+    var places = res.data;
+    if (!places.length) return;
+    var bounds = new google.maps.LatLngBounds();
+    var infoWindow = new google.maps.InfoWindow();
+    var markers = places.map(function (place) {
+      var _place$location$coord = _slicedToArray(place.location.coordinates, 2),
+          placeLng = _place$location$coord[0],
+          placeLat = _place$location$coord[1];
+
+      var position = new google.maps.LatLng(placeLat, placeLng);
+      bounds.extend(position);
+      var marker = new google.maps.Marker({
+        position: position,
+        map: googleMap
+      });
+      marker.place = place;
+      return marker;
+    });
+    markers.forEach(function (marker) {
+      return marker.addListener('click', function () {
+        var html = "<div class=\"popup\">\n        <a href=\"/store/".concat(this.place.slug, "\">\n          <img src=\"/uploads/").concat(this.place.photo || 'store.png', "\" alt=\"").concat(this.place.name, "\"/>\n        </a>\n        <p><strong>").concat(this.place.name, "</strong><br/>").concat(this.place.location.address, "</p>\n      </div>\n      ");
+        infoWindow.setContent(html);
+        infoWindow.open(map, this);
+      });
+    });
+    googleMap.setCenter(bounds.getCenter());
+    googleMap.fitBounds(bounds);
+  }).catch(function (err) {
+    console.log(err);
+  });
+}
+
+function geoSuccess(position) {
+  mapOptions.center.lat = position.coords.latitude;
+  mapOptions.center.lng = position.coords.longitude;
+  googleMap.setCenter(mapOptions.center);
+  loadNearByStores(mapOptions.center);
+}
+
+;
+
+function geoError(error) {
+  console.log('Error occurred. Error code: ' + error.code); // error.code can be:
+  //   0: unknown error
+  //   1: permission denied
+  //   2: position unavailable (error response from location provider)
+  //   3: timed out
+}
+
+;
+/* harmony default export */ __webpack_exports__["default"] = (initMap);
 
 /***/ }),
 

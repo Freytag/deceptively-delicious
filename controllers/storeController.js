@@ -75,7 +75,6 @@ exports.updateStore = async (req, res) => {
 exports.getStores = async(req, res) => {
   // 1. Query the database for a list of all stores.
   const stores = await Store.find(); //finds all stores. returns promise
-
   res.render('stores', { title: 'Stores', stores: stores });
 }
 
@@ -131,4 +130,29 @@ exports.searchStores = async (req, res) => {
   // set the max number of results
   .limit(5);
   res.json(stores);
+}
+
+exports.mapStores = async (req, res) => {
+  const coords =  [ req.query.lng, req.query.lat ].map(parseFloat);
+  const query = {
+    location: {
+      $nearSphere: {
+        $geometry: {
+          type : "Point",
+          coordinates : coords
+        },
+       $maxDistance: 10000
+      }
+    }
+  }
+  // .select allows us to define only the properties we want
+  // selective   photo  name
+  // exclusive  -photo -name
+  const stores = await Store.find(query).select('slug name description location photo').limit(10);
+
+  res.json(stores);
+}
+
+exports.showMap = (req, res) => {
+  res.render('map', {title: 'Stores Near By'});
 }

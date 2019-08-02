@@ -1,0 +1,10 @@
+extend layout
+
+block content
+  .inner
+    .h2= title
+    .map I'm a map;
+      .autocomplete
+        input.autocomplete(type="text" placeholder="Search for Anything" name="geolocate")
+      #map
+        p loading map...
