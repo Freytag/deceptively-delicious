@@ -15,7 +15,7 @@ function ajaxHeart(e) {
         }, 2500)
 
       }
-      $('heart-counted').textContent = res.data.hearts.length;
+      $('.heart-count').textContent = res.data.hearts.length;
     })
     .catch()
 }
