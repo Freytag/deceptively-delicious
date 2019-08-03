@@ -68,7 +68,7 @@ function loadNearByStores(loc) {
 function geoSuccess(position) {
   mapOptions.center.lat = position.coords.latitude;
   mapOptions.center.lng = position.coords.longitude;
-  googleMap.setCenter(mapOptions.center);
+  // googleMap.setCenter(mapOptions.center);
   loadNearByStores(mapOptions.center);
 };
 

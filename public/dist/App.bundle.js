@@ -3593,6 +3593,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _modules_autocomplete__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./modules/autocomplete */ "./public/javascripts/modules/autocomplete.js");
 /* harmony import */ var _modules_typeahead__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./modules/typeahead */ "./public/javascripts/modules/typeahead.js");
 /* harmony import */ var _modules_map__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./modules/map */ "./public/javascripts/modules/map.js");
+/* harmony import */ var _modules_heart__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./modules/heart */ "./public/javascripts/modules/heart.js");
+
 
 
 
@@ -3601,6 +3603,8 @@ __webpack_require__.r(__webpack_exports__);
 Object(_modules_autocomplete__WEBPACK_IMPORTED_MODULE_2__["default"])(Object(_modules_bling__WEBPACK_IMPORTED_MODULE_1__["$"])('#search'), Object(_modules_bling__WEBPACK_IMPORTED_MODULE_1__["$"])('#name'), Object(_modules_bling__WEBPACK_IMPORTED_MODULE_1__["$"])('#address'), Object(_modules_bling__WEBPACK_IMPORTED_MODULE_1__["$"])('#lat'), Object(_modules_bling__WEBPACK_IMPORTED_MODULE_1__["$"])('#lng'));
 Object(_modules_typeahead__WEBPACK_IMPORTED_MODULE_3__["default"])(Object(_modules_bling__WEBPACK_IMPORTED_MODULE_1__["$"])('.search'));
 Object(_modules_map__WEBPACK_IMPORTED_MODULE_4__["default"])(Object(_modules_bling__WEBPACK_IMPORTED_MODULE_1__["$"])('#map'));
+var heartForms = Object(_modules_bling__WEBPACK_IMPORTED_MODULE_1__["$$"])('form.heart');
+heartForms.on('submit', _modules_heart__WEBPACK_IMPORTED_MODULE_5__["default"]);
 
 /***/ }),
 
@@ -3663,6 +3667,45 @@ NodeList.prototype.on = NodeList.prototype.addEventListener = function (name, fn
 };
 
 
+
+/***/ }),
+
+/***/ "./public/javascripts/modules/heart.js":
+/*!*********************************************!*\
+  !*** ./public/javascripts/modules/heart.js ***!
+  \*********************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _bling__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./bling */ "./public/javascripts/modules/bling.js");
+
+
+
+function ajaxHeart(e) {
+  var _this = this;
+
+  e.preventDefault();
+  axios__WEBPACK_IMPORTED_MODULE_0___default.a.post(this.action).then(function (res) {
+    // this is our Form and it allows us to access elements by their name property
+    var isHearted = _this.heart.classList.toggle('heart__button--hearted');
+
+    if (isHearted) {
+      _this.heart.classList.add('heart__button--float');
+
+      setTimeout(function () {
+        _this.heart.classList.remove('heart__button--float');
+      }, 2500);
+    }
+
+    Object(_bling__WEBPACK_IMPORTED_MODULE_1__["$"])('heart-counted').textContent = res.data.hearts.length;
+  }).catch();
+}
+
+/* harmony default export */ __webpack_exports__["default"] = (ajaxHeart);
 
 /***/ }),
 
@@ -3749,8 +3792,8 @@ function loadNearByStores(loc) {
 
 function geoSuccess(position) {
   mapOptions.center.lat = position.coords.latitude;
-  mapOptions.center.lng = position.coords.longitude;
-  googleMap.setCenter(mapOptions.center);
+  mapOptions.center.lng = position.coords.longitude; // googleMap.setCenter(mapOptions.center);
+
   loadNearByStores(mapOptions.center);
 }
 
