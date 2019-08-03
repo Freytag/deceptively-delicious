@@ -1,8 +1,6 @@
 import { $, $$ } from './bling';
 import axios from 'axios';
 
-navigator.geolocation.getCurrentPosition(geoSuccess, geoError);
-
 let googleMap;
 
 const mapOptions = {
@@ -15,6 +13,7 @@ const mapOptions = {
 
 function initMap(mapDiv) {
   if (!mapDiv) return;
+  navigator.geolocation.getCurrentPosition(geoSuccess, geoError);
   googleMap = new google.maps.Map(mapDiv, mapOptions)
   const searchInput = $('[name=geolocate]');
   const autocomplete = new google.maps.places.Autocomplete(searchInput);
