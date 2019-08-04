@@ -43,8 +43,15 @@ const storeSchema = new mongoose.Schema({
     ref: 'User',
     required: 'Every store must have an author'
   }
+},
+// virtuals do not get but on the top level object by default
+{
+  toJSON: { virtuals: true},
+  toObject: { virtuals: true}
 });
 
+// an index on the storeSchema tells MongoDB
+// that we want to access a lot of information so pre cache it.
 storeSchema.index({
   name: 'text',
   description: 'text'
@@ -62,16 +69,65 @@ storeSchema.pre('save', async function(next) {
 })
 
 // TODO add pre-save function to remove HTML from specific inputs before saving to DB.
-
+// .aggregate is a complex query function similar to .find
 storeSchema.statics.getTagsList = function() {
   return this.aggregate([
+    // $ says this is a field on my document i want to unwind
     { $unwind: '$tags' },
-      // $ says this is a field on my document i want to unwind
+    //group everything based on their tag field. //new property count using sum operator.
     { $group: { _id: '$tags', count: { $sum: 1 } } },
-      //group everything based on their tag field. //new property count using sum operator.
+    // -1 descending, 1 ascending
     { $sort: { count: -1 } }
-     // -1 descending, 1 ascending
   ]);
 }
+
+storeSchema.statics.getTopStores = function() {
+  return this.aggregate([
+    // 1. Lookup stores and populate their reviews
+    { $lookup: {
+        // mongoDB will take the model name and lowercase it and add an 's' at the end
+        from: 'reviews',
+        localField: '_id',
+        foreignField: 'store',
+        as: 'reviews'
+      }
+    },
+    // 2. Filter for stores with more than 1 review
+    { $match: {'reviews.1': {$exists: true }}},
+    // 3. Add an averageReviews field (Project is to add a field)
+    // newer $addFields method just added the one field on the existing document
+    { $addFields: {
+      averageRating: {$avg: '$reviews.rating'}
+    }},
+    // or
+    // older method project only returns the one field, so we have to add the ones we want to include
+    // { $project: {
+    //   photo: '$$ROOT.photo',
+    //   name: '$$ROOT.name',
+    //   reviews: '$$ROOT.reviews',
+    //   averageRating: {$avg: '$reviews.rating'}
+    // }},
+    // 4. Sort by our new field
+    { $sort: { averageRating: -1 }},
+    // 5. Limit to max 10 stores
+    { $limit: 10 }
+  ])
+}
+
+// can't use virtuals in aggregate, aggregate doesn't know about them
+// find reviews where the stored id property === reviews store
+storeSchema.virtual('review', {
+  ref: 'Review', // what model to link
+  localField: '_id', // which field on the store
+  foreignField: 'store' // which field in the review model
+})
+
+function autoPopulate(next) {
+  this.populate('review');
+  next();
+}
+
+storeSchema.pre('find', autoPopulate);
+storeSchema.pre('findOne', autoPopulate);
 
 module.exports = mongoose.model('Store', storeSchema);

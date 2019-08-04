@@ -83,8 +83,8 @@ exports.getStoreBySlug = async (req, res) => {
   // 1. find store given the ID
   const storeSlug = req.params.slug;
   // 2. render the edit form to allow the user to update
-  const store = await Store.findOne({ slug: storeSlug});
-  // const store = await Store.findOne({ slug: storeSlug}).populate('author');
+  // const store = await Store.findOne({ slug: storeSlug});
+  const store = await Store.findOne({ slug: storeSlug}).populate('author review');
   res.render('store', { title: `${store.name}`, store });
 }
 
@@ -169,7 +169,12 @@ exports.heartStore = async (req, res) => {
 
 exports.getHearts = async(req, res) => {
   // const stores = await Store.find({ _id: req.user.hearts});
-
   const stores = await Store.find({ _id: { $in: req.user.hearts }});
-  res.render('stores', { title: 'Your ❤️ Stores', stores: stores });
+  res.render('stores', { title: 'Your ❤️ Stores', stores });
+}
+
+exports.getTopStores = async(req, res) => {
+  // best practice is to Keep Big queries with the model, so we created a method
+  const stores = await Store.getTopStores();
+  res.render('top', {title: 'Top Stores', stores})
 }
