@@ -75,8 +75,27 @@ exports.updateStore = async (req, res) => {
 
 exports.getStores = async(req, res) => {
   // 1. Query the database for a list of all stores.
-  const stores = await Store.find(); //finds all stores. returns promise
-  res.render('stores', { title: 'Stores', stores: stores });
+  const page = req.params.page || 1;
+  const limit = 6;
+  const skip = page * limit - limit;
+
+  const countPromise = Store.count();
+  const storesPromise = Store
+    .find()
+    .skip(skip)
+    .limit(limit)
+    .sort({created: 'desc'});
+
+  const [stores, count] = await Promise.all([storesPromise, countPromise]);
+  const pages = Math.ceil(count/limit)
+
+  if (!stores.length && skip) {
+    req.flash('info', `there is no page ${page}, there are only ${pages} pages.`)
+    res.redirect(`/stores/page/${pages}`);
+    return;
+  }
+
+  res.render('stores', { title: 'Stores', stores, page, pages, count });
 }
 
 exports.getStoreBySlug = async (req, res) => {
