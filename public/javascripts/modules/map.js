@@ -1,7 +1,9 @@
 import { $, $$ } from './bling';
 import axios from 'axios';
+import flash from 'connect-flash';
 
-let googleMap;
+let googleMap,
+    autocomplete;
 
 const mapOptions = {
   center: {
@@ -11,28 +13,31 @@ const mapOptions = {
   zoom: 6
 }
 
+export function nearMe() {
+  navigator.geolocation.getCurrentPosition(geoSuccess, geoError);
+}
+
 function initMap(mapDiv) {
   if (!mapDiv) return;
-  navigator.geolocation.getCurrentPosition(geoSuccess, geoError);
   googleMap = new google.maps.Map(mapDiv, mapOptions)
   const searchInput = $('[name=geolocate]');
-  const autocomplete = new google.maps.places.Autocomplete(searchInput);
+  autocomplete = new google.maps.places.Autocomplete(searchInput);
+  loadNearByStores(mapOptions.center);
+  autocomplete.addListener('place_changed', autoPlaceChanged)
+}
 
-  autocomplete.addListener('place_changed', () => {
-    const place = autocomplete.getPlace();
-    console.log(place);
-    loadNearByStores({lat: place.geometry.location.lat(), lng: place.geometry.location.lng()})
-  })
-
+function autoPlaceChanged(){
+  const place = autocomplete.getPlace();
+  loadNearByStores({lat: place.geometry.location.lat(), lng: place.geometry.location.lng()})
 }
 
 function loadNearByStores(loc) {
+  console.info(loc);
   axios
   .get(`/api/stores/near?lat=${loc.lat}&lng=${loc.lng}`)
   .then(res => {
     const places = res.data;
     if (!places.length) return;
-
     const bounds = new google.maps.LatLngBounds();
     const infoWindow = new google.maps.InfoWindow();
 
@@ -60,19 +65,20 @@ function loadNearByStores(loc) {
     googleMap.fitBounds(bounds);
   })
   .catch(err => {
-    console.log(err);
+    console.error(err);
   });
 }
 
 function geoSuccess(position) {
-  mapOptions.center.lat = position.coords.latitude;
-  mapOptions.center.lng = position.coords.longitude;
-  // googleMap.setCenter(mapOptions.center);
-  loadNearByStores(mapOptions.center);
+  const center = {
+    lat: position.coords.latitude,
+    lng: position.coords.longitude
+  };
+  loadNearByStores(center);
 };
 
 function geoError(error) {
-  console.log('Error occurred. Error code: ' + error.code);
+  console.error('Error occurred. Error code: ' + error.code);
   // error.code can be:
   //   0: unknown error
   //   1: permission denied

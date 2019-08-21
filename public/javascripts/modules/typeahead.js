@@ -36,7 +36,7 @@ function typeAhead(search) {
         <div class="search__result">No <strong>${this.value}</strong> places found.</div>`);
       })
       .catch(err => {
-        console.log(err);
+        console.error(err);
       });
   })
 

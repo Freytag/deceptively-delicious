@@ -5,7 +5,6 @@ function autocomplete(searchInput, nameInput, addressInput, latInput, lngInput) 
 
   placeInput.addListener('place_changed', function() {
     const place = placeInput.getPlace();
-    console.log(place);
     nameInput.value = place.name;
     addressInput.value = place.formatted_address;
     latInput.value = place.geometry.location.lat();

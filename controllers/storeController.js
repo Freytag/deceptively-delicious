@@ -84,7 +84,7 @@ exports.getStores = async(req, res) => {
     .find()
     .skip(skip)
     .limit(limit)
-    .sort({created: 'desc'});
+    .sort({name: 'asc'});
 
   const [stores, count] = await Promise.all([storesPromise, countPromise]);
   const pages = Math.ceil(count/limit)

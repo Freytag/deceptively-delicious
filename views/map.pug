@@ -2,9 +2,10 @@ extend layout
 
 block content
   .inner
-    .h2= title
-    .map I'm a map;
+    h2= title
+    .map
       .autocomplete
         input.autocomplete(type="text" placeholder="Search for Anything" name="geolocate")
+      input.button(type="button", class="near-me" value="Near Me")
       #map
         p loading map...
